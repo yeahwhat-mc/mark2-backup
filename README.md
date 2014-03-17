@@ -45,7 +45,7 @@ You can also override:
 
 ## Create configuration files
 
-1. To create the default configuration files which you can use as template, just issue:  
+To create the default configuration files which you can use as template, just issue:  
 
 `su - minecraft`  
 `m2backup`  
@@ -54,7 +54,7 @@ You can also override:
     [INFO] Creating default configuration file /opt/minecraft/.minebackup/default.conf
     [INFO] Successfully created default configuration files, go ahead and adjust the default configuration as you wish.
 
-2. Use the default template:  
+Use the default template:  
 
 `cp /opt/minecraft/.minebackup/default.conf /opt/minecraft/.minebackup/main.conf`  
 
