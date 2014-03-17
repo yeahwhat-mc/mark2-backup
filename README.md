@@ -3,11 +3,7 @@ mark2 backup
 
 Bash script to backup mark2 based Minecraft servers CPU and I/O friendly.
 
-# Commands
-
-    m2backup backup <world>            Backup the server.
-    m2backup list [world]              List current incremental backups.
-    -debug                             Enable debug output (Must be the last argument).
+![](http://cl.ly/image/0A3C0u170G1h/+)
 
 # Configuration
 
@@ -30,6 +26,12 @@ You can also override:
 * `SAY_BACKUP_START` (`Backup started...` by default)
 * `SAY_BACKUP_FINISHED` (`Backup successfully finished.` by default)
 
+# Usage
+
+    m2backup backup <world>  Backup the server.
+    m2backup list [world     List current incremental backups.
+                  -debug     Enable debug output (Must be the last argument).
+
 # Installation
 
 ## Bash script
@@ -41,9 +43,29 @@ You can also override:
     mkdir -p /opt/backups/minecraft
     chown -R $RUNUSER /opt/backups
 
-## Create default configuration files
+## Create configuration files
 
-	m2backup
+1. To create the default configuration files which you can use as template, just issue:  
+
+`su - minecraft`  
+`m2backup`  
+
+    [INFO] Creating configuration folder /opt/minecraft/.minebackup
+    [INFO] Creating default configuration file /opt/minecraft/.minebackup/default.conf
+    [INFO] Successfully created default configuration files, go ahead and adjust the default configuration as you wish.
+
+2. Use the default template:  
+
+`cp /opt/minecraft/.minebackup/default.conf /opt/minecraft/.minebackup/main.conf`  
+
+Now edit the [necessary variables](https://github.com/frdmn/mark2-backup#configuration) (especially the `WORLDS` and `EXCLUDES`) or/and override the additional ones:  
+
+`vi /opt/minecraft/.minebackup/main.conf`   
+
+## First run
+
+`su - minecraft`  
+`m2backup backup main`  
 
 # Dependencies
 
@@ -51,3 +73,8 @@ You need `nice`, `ionice`, `tar` and `mark2` to use all features of minebackup.s
 
 * `apt-get install nice ionice tar`
 * https://mark2.io/install
+
+# Todo
+
+* List backups
+* "Not as root"-feature
