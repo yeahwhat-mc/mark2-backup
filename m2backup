@@ -1,0 +1,246 @@
+#!/bin/bash
+# m2backup was built to backup mark2 based Minecraft servers 
+# Copyright (C) 2014 Jonas Friedmann - License: WTFPL
+
+#####
+# Settings
+#####
+
+# Exectuive user
+RUNAS="minecraft"
+
+# Binary names
+BIN_TAR="tar"
+BIN_NICE="nice"
+BIN_IONICE="ionice"
+BIN_MARK2="mark2"
+
+# nice and ionice settings
+RUNBACKUP_NICE="${BIN_NICE} -n19"
+RUNBACKUP_IONICE="${BIN_IONICE} -c 3"
+
+# Messages
+ANNOUNCE=false
+SAY_BACKUP_START="Backup started..."
+SAY_BACKUP_FINISHED="Backup successfully finished."
+
+# Read user settings from ~/.minebackup.conf
+SETTINGS_FOLDER="${HOME}/.minebackup"
+
+# Timestamp format
+TIMESTAMP=$(date +"%Y-%m-%d-00-00")
+
+#####
+# DO NOT EDIT BELOW
+#####
+
+# Check if $SETTINGS_FOLDER exist
+if [ ! -d ${SETTINGS_FOLDER} ]
+then
+  # Create default one
+  echo "[INFO] Creating configuration folder ${SETTINGS_FOLDER}"
+  mkdir -p ${SETTINGS_FOLDER}
+  echo "[INFO] Creating default configuration file ${SETTINGS_FOLDER}/default.conf"
+  cat > ${SETTINGS_FOLDER}/default.conf << EOCONF
+# Mark2 session name
+MARK2NAME="mc-default"
+# Server root directory
+SERVERDIR="/opt/minecraft/mc-default"
+# Backup directory
+BACKUPDIR="/opt/backups/minecraft/mc-default"
+
+# Folders / worlds to backup
+WORLDS=( "plugins logs" )
+
+# Exclude the following files/directories in backups
+EXCLUDES=("plugins/dynmap/web/tiles/")
+
+## Overridable configurations (remove "#" to activate)
+#RUNBACKUP_NICE="${BIN_NICE} -n19"
+#RUNBACKUP_IONICE="${BIN_IONICE} -c 3"
+
+# Timestamp format
+#TIMESTAMP=$(date +"%Y-%m-%d-00-00")
+
+#ANNOUNCE=false
+#SAY_BACKUP_START="Backup started..."
+#SAY_BACKUP_FINISHED="Backup successfully finished."
+EOCONF
+echo "[INFO] Successfully created default configuration files, go ahead and adjust the default configuration as you wish."
+exit
+fi
+
+# Check if binaries exist
+BINS=( "${BIN_TAR} ${BIN_NICE} ${BIN_IONICE} ${BIN_MARK2}" )
+for BIN in $BINS;
+do
+  type -P ${BIN} &>/dev/null && continue || echo "'${BIN} not found! Make sure you've installed that depencendy"; exit 1
+done
+
+# Check if $BACKUPDIR exist
+if [ ! -d ${BACKUPDIR} ]
+then
+  echo "'${BACKUPDIR}' doesn't exist. Run the following commands as root:"
+  echo "mkdir -p ${BACKUPDIR}"
+  echo "chown -R ${USER} ${BACKUPDIR}"
+  exit 1
+fi
+
+function load_config () {
+  [ ${DODEBUG} -eq 1 ] && set -x
+  if [ -z ${1} ]; then
+    # Check if second argument exists
+    echo "[ERROR] No second argument given"
+    exit 1
+  elif [[ ${1} == "-debug" ]]; then
+    # Check if it's not "-debug"
+    echo "[ERROR] No second argument given"
+    exit 1
+  else
+    # Load config
+    if [ -f ${SETTINGS_FOLDER}/${1}.conf ]
+    then
+      . ${SETTINGS_FOLDER}/${1}.conf
+    else
+      echo "[ERROR] Couldn't find configuration file ${SETTINGS_FOLDER}/${1}.conf"
+      exit 1
+    fi
+  fi
+}
+
+# 'Check executive user' function
+function as_user() {
+  [ ${DODEBUG} -eq 1 ] && set -x
+  if [ "$(whoami)" = "${RUNAS}" ] ; then
+    /bin/bash -c "$1" 
+  else
+    su - ${RUNAS} -c "$1"
+  fi
+}
+
+# 'Check running process' function
+function is_running() {
+  [ ${DODEBUG} -eq 1 ] && set -x
+  if mark2 list | grep "${MARK2NAME}" >/dev/null 2>&1
+  then
+    return 0 
+  else
+    return 1
+  fi
+}
+
+# 'Disable ingame saving' function
+function mc_saveoff() {
+  [ ${DODEBUG} -eq 1 ] && set -x
+  if is_running
+  then
+    echo -ne "[INFO] ${MARK2NAME} is running, suspending saves... "
+    [ "${ANNOUNCE}" = true ] && as_user "mark2 send -n ${MARK2NAME} 'say ${SAY_BACKUP_START}'"
+    as_user "mark2 send -n ${MARK2NAME} 'save-off'"
+    as_user "mark2 send -n ${MARK2NAME} 'save-all'"
+    sleep 3
+    echo -ne "done\n"
+  else
+    echo "[INFO] ${MARK2NAME} was not running... done"
+  fi
+}
+
+# 'Enable ingame saving' function
+function mc_saveon() {
+  [ ${DODEBUG} -eq 1 ] && set -x
+  if is_running
+  then
+    echo -ne "[INFO] ${MARK2NAME} is running, re-enabling saves... "
+    [ "${ANNOUNCE}" = true ] && as_user "mark2 send -n ${MARK2NAME} 'say ${SAY_BACKUP_FINISHED}'"
+    as_user "mark2 send -n  ${MARK2NAME} 'save-on'"
+    echo -ne "done\n"
+  else
+    echo "[INFO] ${MARK2NAME} was not running. Not resuming saves... done"
+  fi
+}
+
+# Backup function
+function mc_backup() {
+  [ ${DODEBUG} -eq 1 ] && set -x
+  # For each world/folder in the server directory
+  echo -ne "[INFO] Starting to backup each world...\n"
+  for i in ${WORLDS}; do
+    echo -ne "[INFO] Processing world/folder \"${i}\"...\n"
+    # Check if folder exists in destination
+    if [ ! -d ${BACKUPDIR}/${i} ]
+    then
+      echo -ne "[INFO] Creating folders for backup destination \"${BACKUPDIR}/${i}\"...\n"
+      as_user "mkdir -p ${BACKUPDIR}/${i}" 
+    fi
+
+    # Check if backup already exists
+    if [ -f ${BACKUPDIR}/${i}/${TIMESTAMP}.tgz ]
+    then
+      echo -ne "[ERROR] Backup already exists \"${BACKUPDIR}/${i}/${TIMESTAMP}.tgz\"\n"
+      exit 
+    fi
+
+    # Build exclude string
+    local _tarexcludes=""
+    for ii in ${EXCLUDES[@]}
+    do
+      _tarexcludes="$_tarexcludes --exclude='${ii}'"
+    done
+
+    # Check if permissions are okay
+    touchtest=$(touch ${BACKUPDIR}/${i}/.test)
+    touchstatus=$?
+    [ $touchstatus -eq 0 ] && echo -ne "[INFO] Check for correct permissions ... done\n" && rm ${BACKUPDIR}/${i}/.test
+    [ $touchstatus -ne 0 ] && echo -ne "[ERROR] Check for correct permissions ... failed\n" && exit
+
+    echo -ne "Backup '${i}' ..."
+    echo ${RUNBACKUP_NICE} ${RUNBACKUP_IONICE} ${BIN_TAR} czf ${BACKUPDIR}/${i}/${TIMESTAMP}.tgz ${SERVERDIR}/${i} ${_tarexcludes} #>/dev/null 2>&1
+    echo -ne "done\n"
+  done
+  exit 1
+}
+
+# 'List available backups' function
+function listbackups() {
+  [ ${DODEBUG} -eq 1 ] && set -x
+
+   #! ToDo !#
+}
+
+#####
+# Catch argument
+#####
+
+echo "$@" > /dev/null 2>&1 
+if [ "$_" = '-debug' ];
+then
+    DODEBUG=1
+else
+    DODEBUG=0
+fi
+#Start-Stop here
+case "${1}" in
+  list)
+    load_config "${2}"
+    listbackups "${2}"
+    ;;
+  backup)
+    load_config "${2}"
+    mc_saveoff "${2}" 
+    mc_backup "${2}"
+    mc_saveon "${2}"
+    ;;
+  *)cat << EOHELP
+Usage: ${0} COMMAND [ARGUMENT]
+
+COMMANDS
+
+    backup <world>            Backup a mark2 server.
+    list <world>              List available backups per server.
+    -debug                    Enable debug output (Must be the last argument).
+EOHELP
+    exit 1
+  ;;
+esac
+
+exit 0
