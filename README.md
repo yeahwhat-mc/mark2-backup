@@ -65,7 +65,13 @@ Now edit the [necessary variables](https://github.com/frdmn/mark2-backup#configu
 ## First run
 
 `su - minecraft`  
-`m2backup backup main`  
+`m2backup backup main`
+
+## cron.d
+
+You can find an example `cron.d` file in the `lib/cron.d` folder:
+
+`cp /usr/local/src/mark2-backup/lib/cron.d/m2backup /etc/cron.d/m2backup`  
 
 # Dependencies
 
