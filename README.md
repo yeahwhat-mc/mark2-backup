@@ -36,10 +36,14 @@ You can also override:
 
     cd /usr/local/src
     git clone https://github.com/frdmn/mark2-backup.git
-    ln -s mark2-backup/m2backup /usr/bin/m2backup
+    ln -s /usr/local/src/mark2-backup/m2backup /usr/bin/m2backup
     chmod a+x /usr/bin/m2backup
     mkdir -p /opt/backups/minecraft
     chown -R $RUNUSER /opt/backups
+
+## Create default configuration files
+
+	m2backup
 
 # Dependencies
 
