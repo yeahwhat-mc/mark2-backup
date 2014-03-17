@@ -53,7 +53,7 @@ BACKUPDIR="/opt/backups/minecraft/mc-default"
 WORLDS=( "plugins logs" )
 
 # Exclude the following files/directories in backups
-EXCLUDES=("plugins/dynmap/web/tiles/")
+EXCLUDES=("plugins/dynmap/web/tiles")
 
 ## Overridable configurations (remove "#" to activate)
 #RUNBACKUP_NICE="${BIN_NICE} -n19"
