@@ -176,26 +176,26 @@ function mc_backup() {
     # Check if backup already exists
     if [ -f ${BACKUPDIR}/${i}/${TIMESTAMP}.tgz ]
     then
+      # Backup already existant
       echo -ne "[ERROR] Backup already exists \"${BACKUPDIR}/${i}/${TIMESTAMP}.tgz\"\n"
-      exit 
+    else
+      # Build exclude string
+      local _tarexcludes=""
+      for ii in ${EXCLUDES[@]}
+      do
+        _tarexcludes="$_tarexcludes --exclude='${ii}'"
+      done
+
+      # Check if permissions are okay
+      touchtest=$(touch ${BACKUPDIR}/${i}/.test)
+      touchstatus=$?
+      [ $touchstatus -eq 0 ] && echo -ne "[INFO] Check for correct permissions ... done\n" && rm ${BACKUPDIR}/${i}/.test
+      [ $touchstatus -ne 0 ] && echo -ne "[ERROR] Check for correct permissions ... failed\n" && exit
+
+      echo -ne "[INFO] Backup '${i}' ..."
+      ${RUNBACKUP_NICE} ${RUNBACKUP_IONICE} ${BIN_TAR} cvzf ${BACKUPDIR}/${i}/${TIMESTAMP}.tgz ${SERVERDIR}/${i} ${_tarexcludes} >/dev/null 2>&1
+      echo -ne "done\n"
     fi
-
-    # Build exclude string
-    local _tarexcludes=""
-    for ii in ${EXCLUDES[@]}
-    do
-      _tarexcludes="$_tarexcludes --exclude='${ii}'"
-    done
-
-    # Check if permissions are okay
-    touchtest=$(touch ${BACKUPDIR}/${i}/.test)
-    touchstatus=$?
-    [ $touchstatus -eq 0 ] && echo -ne "[INFO] Check for correct permissions ... done\n" && rm ${BACKUPDIR}/${i}/.test
-    [ $touchstatus -ne 0 ] && echo -ne "[ERROR] Check for correct permissions ... failed\n" && exit
-
-    echo -ne "[INFO] Backup '${i}' ..."
-    ${RUNBACKUP_NICE} ${RUNBACKUP_IONICE} ${BIN_TAR} cvzf ${BACKUPDIR}/${i}/${TIMESTAMP}.tgz ${SERVERDIR}/${i} ${_tarexcludes} >/dev/null 2>&1
-    echo -ne "done\n"
   done
 }
 
