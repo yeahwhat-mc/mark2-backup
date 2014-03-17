@@ -194,7 +194,7 @@ function mc_backup() {
     [ $touchstatus -ne 0 ] && echo -ne "[ERROR] Check for correct permissions ... failed\n" && exit
 
     echo -ne "Backup '${i}' ..."
-    echo ${RUNBACKUP_NICE} ${RUNBACKUP_IONICE} ${BIN_TAR} czf ${BACKUPDIR}/${i}/${TIMESTAMP}.tgz ${SERVERDIR}/${i} ${_tarexcludes} #>/dev/null 2>&1
+    ${RUNBACKUP_NICE} ${RUNBACKUP_IONICE} ${BIN_TAR} cvzf ${BACKUPDIR}/${i}/${TIMESTAMP}.tgz ${SERVERDIR}/${i} ${_tarexcludes} >/dev/null 2>&1
     echo -ne "done\n"
   done
   exit 1
