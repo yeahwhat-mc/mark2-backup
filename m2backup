@@ -197,7 +197,6 @@ function mc_backup() {
     ${RUNBACKUP_NICE} ${RUNBACKUP_IONICE} ${BIN_TAR} cvzf ${BACKUPDIR}/${i}/${TIMESTAMP}.tgz ${SERVERDIR}/${i} ${_tarexcludes} >/dev/null 2>&1
     echo -ne "done\n"
   done
-  exit 1
 }
 
 # 'List available backups' function
