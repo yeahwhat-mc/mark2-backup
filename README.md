@@ -37,7 +37,7 @@ You can also override:
 ## Bash script
 
     cd /usr/local/src
-    git clone https://github.com/frdmn/mark2-backup.git
+    git clone https://github.com/yeahwhat-mc/mark2-backup.git
     ln -s /usr/local/src/mark2-backup/m2backup /usr/bin/m2backup
     chmod a+x /usr/bin/m2backup
     mkdir -p /opt/backups/minecraft
