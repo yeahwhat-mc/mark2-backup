@@ -183,7 +183,7 @@ function mc_backup() {
       local _tarexcludes=""
       for ii in ${EXCLUDES[@]}
       do
-        _tarexcludes="$_tarexcludes --exclude='${ii}'"
+        _tarexcludes="$_tarexcludes --exclude=${ii}"
       done
 
       # Check if permissions are okay
