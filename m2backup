@@ -55,6 +55,9 @@ WORLDS=( "plugins logs" )
 # Exclude the following files/directories in backups
 EXCLUDES=("plugins/dynmap/web/tiles")
 
+# Clear logs older than N days
+AUTOCLEAR="7"
+
 ## Overridable configurations (remove "#" to activate)
 #RUNBACKUP_NICE="${BIN_NICE} -n19"
 #RUNBACKUP_IONICE="${BIN_IONICE} -c 3"
@@ -206,6 +209,24 @@ function listbackups() {
    #! ToDo !#
 }
 
+# 'List available backups' function
+function autoclear() {
+  [ ${DODEBUG} -eq 1 ] && set -x
+
+  if [ -z ${1} ]; then
+    # Check if second argument exists
+    echo "[ERROR] No second argument given"
+    exit 1
+  fi
+
+  if [[ -z ${AUTOCLEAR} ]]; then
+    echo "[ERROR] No AUTOCLEAR configuration variable found!"
+    exit 1
+  fi
+
+  find ${BACKUPDIR} -mtime +3 -exec echo {} \;
+}
+
 #####
 # Catch argument
 #####
@@ -229,12 +250,17 @@ case "${1}" in
     mc_backup "${2}"
     mc_saveon "${2}"
     ;;
+  clear)
+    load_config "${2}"
+    autoclear "${2}"
+    ;;
   *)cat << EOHELP
 Usage: ${0} COMMAND [ARGUMENT]
 
 COMMANDS
 
     backup <world>            Backup a mark2 server.
+    clear <world>             Clear old backups older than \"n\" days
     list <world>              List available backups per server.
     -debug                    Enable debug output (Must be the last argument).
 EOHELP
