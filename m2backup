@@ -224,7 +224,7 @@ function autoclear() {
     exit 1
   fi
 
-  find ${BACKUPDIR} -mtime +3 -exec echo {} \;
+  find ${BACKUPDIR} -mtime +${AUTOCLEAR} -type f -exec rm {} \;
 }
 
 #####
