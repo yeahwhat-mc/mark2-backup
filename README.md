@@ -84,3 +84,7 @@ You need `nice`, `ionice`, `tar` and `mark2` to use all features of minebackup.s
 
 * List backups
 * "Not as root"-feature
+
+## License
+
+(MIT)[LICENSE]
