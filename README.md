@@ -5,7 +5,7 @@ Bash script to backup mark2 based Minecraft servers CPU and I/O friendly.
 
 ![](http://cl.ly/image/0A3C0u170G1h/+)
 
-# Configuration
+## Configuration
 
 As you might see, this script creates a configration file in your `$HOME folder.  
 
@@ -26,33 +26,38 @@ You can also override:
 * `SAY_BACKUP_START` (`Backup started...` by default)
 * `SAY_BACKUP_FINISHED` (`Backup successfully finished.` by default)
 
-# Usage
+## Usage
 
-    m2backup backup <world>  Backup the server.
-    m2backup list [world     List current incremental backups.
-                  -debug     Enable debug output (Must be the last argument).
+```
+m2backup backup <world>  Backup the server.
+m2backup list [world     List current incremental backups.
+              -debug     Enable debug output (Must be the last argument).
+```
 
-# Installation
+## Installation
 
-## Bash script
+### Bash script
 
-    cd /usr/local/src
-    git clone https://github.com/yeahwhat-mc/mark2-backup.git
-    ln -s /usr/local/src/mark2-backup/m2backup /usr/bin/m2backup
-    chmod a+x /usr/bin/m2backup
-    mkdir -p /opt/backups/minecraft
-    chown -R $RUNUSER /opt/backups
+```shell
+cd /usr/local/src
+git clone https://github.com/yeahwhat-mc/mark2-backup.git
+ln -s /usr/local/src/mark2-backup/m2backup /usr/bin/m2backup
+chmod a+x /usr/bin/m2backup
+mkdir -p /opt/backups/minecraft
+chown -R $RUNUSER /opt/backups
+```
 
-## Create configuration files
+### Create configuration files
 
 To create the default configuration files which you can use as template, just issue:  
 
-`su - minecraft`  
 `m2backup`  
 
-    [INFO] Creating configuration folder /opt/minecraft/.minebackup
-    [INFO] Creating default configuration file /opt/minecraft/.minebackup/default.conf
-    [INFO] Successfully created default configuration files, go ahead and adjust the default configuration as you wish.
+```
+[INFO] Creating configuration folder /opt/minecraft/.minebackup
+[INFO] Creating default configuration file /opt/minecraft/.minebackup/default.conf
+[INFO] Successfully created default configuration files, go ahead and adjust the default configuration as you wish.
+```
 
 Use the default template:  
 
@@ -62,25 +67,24 @@ Now edit the [necessary variables](https://github.com/frdmn/mark2-backup#configu
 
 `vi /opt/minecraft/.minebackup/main.conf`   
 
-## First run
+### First run
 
-`su - minecraft`  
 `m2backup backup main`
 
-## cron.d
+### cron.d
 
 You can find an example `cron.d` file in the `lib/cron.d` folder:
 
 `cp /usr/local/src/mark2-backup/lib/cron.d/m2backup /etc/cron.d/m2backup`  
 
-# Dependencies
+## Dependencies
 
 You need `nice`, `ionice`, `tar` and `mark2` to use all features of minebackup.sh:
 
 * `apt-get install nice ionice tar`
 * https://mark2.io/install
 
-# Todo
+## Todo
 
 * List backups
 * "Not as root"-feature
