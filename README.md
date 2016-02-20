@@ -19,6 +19,7 @@ Make sure you made all adjustments as your needs for the following variables:
 
 You can also override:
 
+* `RUNAS` (`minecraft` by default)
 * `RUNBACKUP_NICE` (`${BIN_NICE} -n19` by default)
 * `RUNBACKUP_IONICE` (`${BIN_IONICE} -c 3` by default)
 * `TIMESTAMP` (`$(date +"%Y-%m-%d-00-00")` by default)
@@ -87,7 +88,6 @@ You need `nice`, `ionice`, `tar` and `mark2` to use all features of minebackup.s
 ## Todo
 
 * List backups
-* "Not as root"-feature
 
 ## License
 
