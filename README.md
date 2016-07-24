@@ -91,4 +91,4 @@ You need `nice`, `ionice`, `tar` and `mark2` to use all features of minebackup.s
 
 ## License
 
-(MIT)[LICENSE]
+[MIT](LICENSE)
