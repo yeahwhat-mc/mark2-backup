@@ -1,15 +1,5 @@
-#
-# cron-jobs for m2munin
-# https://github.com/frdmn/mark2-backup
-#
+# cron-jobs for mark2-backup
+# https://github.com/yeahwhat-mc/mark2-backup
 
 0 3 * * *        minecraft       /usr/bin/m2backup backup main
 0 3 * * *        minecraft       /usr/bin/m2backup clear main
-5 3 * * *        minecraft       /usr/bin/m2backup backup pvp
-5 3 * * *        minecraft       /usr/bin/m2backup clear pvp
-10 3 * * *       minecraft       /usr/bin/m2backup backup hungergame
-10 3 * * *       minecraft       /usr/bin/m2backup clear hungergame
-13 3 * * *       minecraft       /usr/bin/m2backup backup minigame
-13 3 * * *       minecraft       /usr/bin/m2backup clear minigame
-15 3 */7 * *     minecraft       /usr/bin/m2backup backup hexxit
-15 3 */7 * *     minecraft       /usr/bin/m2backup clear hexxit
